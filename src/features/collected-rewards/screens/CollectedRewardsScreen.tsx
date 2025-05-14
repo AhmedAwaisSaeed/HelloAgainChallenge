@@ -1,49 +1,57 @@
-import React from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, FlatList, Text } from 'react-native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
-import { commonStyles, colors, typography } from '../../../shared/styles/common';
+import CustomHeader from '../../../shared/components/CustomHeader';
+import { commonStyles } from '../../../shared/styles/common';
 import { Reward } from '../../../core/types/reward';
+import { styles } from './styles';
+
+// Keep RewardCard memoized as it's a list item
+const MemoizedRewardCard = React.memo(RewardCard);
+
+const EmptyState = () => (
+  <View style={[commonStyles.container, styles.centerContent]}>
+    <Text style={styles.emptyText}>No collected rewards yet</Text>
+  </View>
+);
 
 const CollectedRewardsScreen = () => {
   const { collectedRewards } = useRewards();
 
-  const renderItem = ({ item }: { item: Reward }) => (
-    <RewardCard
+  const renderItem = useCallback(({ item }: { item: Reward }) => (
+    <MemoizedRewardCard
       reward={item}
       isCollected={true}
     />
-  );
+  ), []);
+
+  const keyExtractor = useCallback((item: Reward) => item.id, []);
 
   if (collectedRewards.length === 0) {
     return (
-      <View style={[commonStyles.container, styles.centerContent]}>
-        <Text style={styles.emptyText}>No collected rewards yet</Text>
-      </View>
+      <>
+        <CustomHeader title="Collected Rewards" showBack />
+        <EmptyState />
+      </>
     );
   }
 
   return (
     <View style={commonStyles.container}>
+      <CustomHeader title="Collected Rewards" showBack />
       <FlatList
         data={collectedRewards}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={8}
+        windowSize={5}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  centerContent: {
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-  },
-  emptyText: {
-    fontSize: typography.body.fontSize,
-    color: colors.textSecondary,
-    fontWeight: '400' as const,
-  },
-});
 
 export default CollectedRewardsScreen;

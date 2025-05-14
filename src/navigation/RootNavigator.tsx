@@ -8,16 +8,19 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: 'white' },
+      }}
+    >
       <Stack.Screen
         name="AvailableRewards"
         component={AvailableRewardsScreen}
-        options={{ title: 'Available Rewards' }}
       />
       <Stack.Screen
         name="CollectedRewards"
         component={CollectedRewardsScreen}
-        options={{ title: 'Collected Rewards' }}
       />
     </Stack.Navigator>
   );
