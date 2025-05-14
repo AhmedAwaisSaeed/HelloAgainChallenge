@@ -1,11 +1,59 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
-import { commonStyles, colors, spacing, typography } from '../../../shared/styles/common';
+import CustomHeader from '../../../shared/components/CustomHeader';
+import { commonStyles, colors } from '../../../shared/styles/common';
 import { Reward } from '../../../core/types/reward';
 import { RootStackParamList } from '../../../navigation/types';
+import { styles } from './styles';
+
+// Keep RewardCard memoized as it's a list item
+const MemoizedRewardCard = React.memo(RewardCard);
+
+// Keep ListHeader memoized as it receives stable props and is part of the list
+const ListHeader = React.memo(({ collectedCount, onPress }: { collectedCount: number; onPress: () => void }) => (
+  <TouchableOpacity
+    style={styles.collectedButton}
+    onPress={onPress}
+  >
+    <Text style={styles.collectedButtonText}>
+      View Collected Rewards ({collectedCount})
+    </Text>
+  </TouchableOpacity>
+));
+
+// Keep ListFooter memoized as it's reused in the list with same props frequently
+const ListFooter = React.memo(({ loading, hasMore }: { loading: boolean; hasMore: boolean }) => {
+  if (!loading) {
+    if (!hasMore) {
+      return (
+        <View style={styles.footer}>
+          <Text style={styles.endText}>No more rewards available</Text>
+        </View>
+      );
+    }
+    return null;
+  }
+  return (
+    <View style={styles.footer}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
+});
+
+// Simple component, no need for memo
+const ListEmpty = ({ loading, error }: { loading: boolean; error: string | null }) => {
+  if (loading) {return null;}
+  return (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>
+        {error || 'No rewards available'}
+      </Text>
+    </View>
+  );
+};
 
 const AvailableRewardsScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -27,15 +75,13 @@ const AvailableRewardsScreen = () => {
     loadRewards(true);
   }, [loadRewards]);
 
-  const renderItem = useCallback(({ item }: { item: Reward }) => {
-    return (
-      <RewardCard
-        reward={item}
-        onCollect={handleCollectReward}
-        isCollected={isRewardCollected(item.id)}
-      />
-    );
-  }, [handleCollectReward, isRewardCollected]);
+  const renderItem = useCallback(({ item }: { item: Reward }) => (
+    <MemoizedRewardCard
+      reward={item}
+      onCollect={handleCollectReward}
+      isCollected={isRewardCollected(item.id)}
+    />
+  ), [handleCollectReward, isRewardCollected]);
 
   const handleLoadMore = useCallback(() => {
     if (!loading && hasMore && !isLoadingMore.current) {
@@ -46,50 +92,15 @@ const AvailableRewardsScreen = () => {
     }
   }, [loading, hasMore, loadRewards]);
 
-  const renderFooter = () => {
-    if (!loading && !isLoadingMore.current) {
-      if (!hasMore) {
-        return (
-          <View style={styles.footer}>
-            <Text style={styles.endText}>No more rewards available</Text>
-          </View>
-        );
-      }
-      return null;
-    }
-    return (
-      <View style={styles.footer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  };
-
-  const renderHeader = useCallback(() => (
-    <TouchableOpacity
-      style={styles.collectedButton}
-      onPress={() => navigation.navigate('CollectedRewards')}
-    >
-      <Text style={styles.collectedButtonText}>
-        View Collected Rewards ({collectedRewards.length})
-      </Text>
-    </TouchableOpacity>
-  ), [navigation, collectedRewards.length]);
-
-  const renderEmpty = () => {
-    if (loading) {return null;}
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>
-          {error || 'No rewards available'}
-        </Text>
-      </View>
-    );
-  };
+  const handleNavigateToCollected = useCallback(() => {
+    navigation.navigate('CollectedRewards');
+  }, [navigation]);
 
   const keyExtractor = useCallback((item: Reward) => item.id, []);
 
   return (
     <View style={commonStyles.container}>
+      <CustomHeader title="Available Rewards" />
       <FlatList
         ref={flatListRef}
         data={rewards}
@@ -97,10 +108,23 @@ const AvailableRewardsScreen = () => {
         keyExtractor={keyExtractor}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={renderFooter}
-        ListEmptyComponent={renderEmpty}
-        removeClippedSubviews={false}
+        ListHeaderComponent={
+          <ListHeader
+            collectedCount={collectedRewards.length}
+            onPress={handleNavigateToCollected}
+          />
+        }
+        ListFooterComponent={
+          <ListFooter loading={loading} hasMore={hasMore} />
+        }
+        ListEmptyComponent={
+          <ListEmpty loading={loading} error={error} />
+        }
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={8}
+        windowSize={5}
         refreshControl={
           <RefreshControl
             refreshing={loading && rewards.length === 0}
@@ -117,45 +141,5 @@ const AvailableRewardsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingBottom: 20,
-  },
-  emptyList: {
-    flex: 1,
-  },
-  footer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  endText: {
-    color: colors.textSecondary,
-    ...typography.body,
-  },
-  collectedButton: {
-    backgroundColor: colors.primary,
-    padding: spacing.md,
-    margin: spacing.md,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  collectedButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500' as const,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  emptyText: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-});
 
 export default AvailableRewardsScreen;
