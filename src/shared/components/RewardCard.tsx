@@ -18,7 +18,7 @@ const RewardCard = ({ reward, onCollect, isCollected }: RewardCardProps) => {
         <Image
           source={{ uri: imageUrl }}
           style={styles.image}
-          resizeMode="cover"
+          resizeMode="contain"
         />
       )}
       <View style={styles.content}>

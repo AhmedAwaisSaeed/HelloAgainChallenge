@@ -1,16 +1,16 @@
-export interface RewardImage {
+export type RewardImage = {
   id: number;
   url: string;
-}
+};
 
-export interface RewardApiResponse {
+export type RewardApiResponse = {
   count: number;
   next: string | null;
   previous: string | null;
   results: Reward[];
-}
+};
 
-export interface Reward {
+export type Reward = {
   id: string;
   name: string;
   description: string;
@@ -28,4 +28,15 @@ export interface Reward {
   bounty_redeem_alert_text: string;
   show_confirmation_dialog: string;
   isCollected?: boolean;
-}
+};
+
+export type UseRewardsReturn = {
+  rewards: Reward[];
+  loading: boolean;
+  error: string | null;
+  hasMore: boolean;
+  collectedRewards: Reward[];
+  loadRewards: (isRefreshing?: boolean) => Promise<void>;
+  handleCollectReward: (reward: Reward) => void;
+  isRewardCollected: (rewardId: string) => boolean;
+};
