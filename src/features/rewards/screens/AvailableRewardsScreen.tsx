@@ -25,7 +25,7 @@ const ListHeader = React.memo(({ collectedCount, onPress }: { collectedCount: nu
 ));
 
 // Keep ListFooter memoized as it's reused in the list with same props frequently
-const ListFooter = React.memo(({ loading, hasMore }: { loading: boolean; hasMore: boolean }) => {
+const ListFooter = React.memo(({ loading, hasMore, rewardsCount }: { loading: boolean; hasMore: boolean; rewardsCount: number }) => {
   if (!loading) {
     if (!hasMore) {
       return (
@@ -36,11 +36,15 @@ const ListFooter = React.memo(({ loading, hasMore }: { loading: boolean; hasMore
     }
     return null;
   }
-  return (
-    <View style={styles.footer}>
-      <ActivityIndicator size="large" color={colors.primary} />
-    </View>
-  );
+  // Only show loading indicator if we're not in a pull-to-refresh state
+  if (loading && rewardsCount > 0) {
+    return (
+      <View style={styles.footer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+  return null;
 });
 
 // Simple component, no need for memo
@@ -115,7 +119,11 @@ const AvailableRewardsScreen = () => {
           />
         }
         ListFooterComponent={
-          <ListFooter loading={loading} hasMore={hasMore} />
+          <ListFooter
+            loading={loading}
+            hasMore={hasMore}
+            rewardsCount={rewards.length}
+          />
         }
         ListEmptyComponent={
           <ListEmpty loading={loading} error={error} />
@@ -129,7 +137,7 @@ const AvailableRewardsScreen = () => {
           <RefreshControl
             refreshing={loading && rewards.length === 0}
             onRefresh={() => loadRewards(true)}
-            enabled={hasMore}
+            enabled={true}
             colors={[colors.primary]}
           />
         }
