@@ -17,16 +17,13 @@ const CustomHeader = ({ title, showBack }: CustomHeaderProps) => {
     navigation.goBack();
   };
 
+  const getHeaderStyle = () => ({
+    paddingTop: Platform.OS === 'ios' ? insets.top : 16,
+    height: Platform.OS === 'ios' ? 44 + insets.top : 56,
+  });
+
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          paddingTop: Platform.OS === 'ios' ? insets.top : 16,
-          height: Platform.OS === 'ios' ? 44 + insets.top : 56,
-        },
-      ]}
-    >
+    <View style={[styles.container, getHeaderStyle()]}>
       <View style={styles.content}>
         {showBack && (
           <TouchableOpacity
@@ -42,7 +39,6 @@ const CustomHeader = ({ title, showBack }: CustomHeaderProps) => {
           </TouchableOpacity>
         )}
         <Text style={[styles.title, showBack && styles.titleWithBack]}>{title}</Text>
-        {/* Add empty View for layout balance when back button is shown */}
         {showBack && <View style={styles.backButtonPlaceholder} />}
       </View>
     </View>
