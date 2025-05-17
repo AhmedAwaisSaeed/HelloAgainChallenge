@@ -4,22 +4,27 @@ import { RewardApiResponse, Reward } from '../types/reward';
 const BASE_URL = 'https://staging.helloagain.at/api/v1/clients/5189';
 
 const hasValidImage = (reward: Reward): boolean => {
+  const { image, pictures } = reward || {};
+
   // Check if either image or pictures array has valid content
   return Boolean(
-    (reward.image && reward.image.trim() !== '') ||
-    (Array.isArray(reward.pictures) && reward.pictures.length > 0 &&
-      reward.pictures.every(pic => pic && typeof pic === 'string' && pic.trim() !== ''))
+    (image && image.trim() !== '') ||
+    (Array.isArray(pictures) && pictures.length > 0 &&
+      pictures.every(pic => pic && typeof pic === 'string' && pic.trim() !== ''))
   );
 };
 
 const isValidReward = (reward: Reward): boolean => {
+  if (!reward) {return false;}
+
+  const { id, name, needed_points } = reward || {};
+
   return Boolean(
-    reward &&
-    reward.id &&
-    reward.name &&
-    reward.name.trim() !== '' &&
-    typeof reward.needed_points === 'number' &&
-    reward.needed_points >= 0 &&
+    id &&
+    name &&
+    name.trim() !== '' &&
+    typeof needed_points === 'number' &&
+    needed_points >= 0 &&
     hasValidImage(reward)
   );
 };
@@ -37,8 +42,13 @@ export const fetchRewards = async (page: number = 1, limit: number = 10): Promis
       },
     });
 
+    // Add safety checks for response data
+    if (!response?.data) {
+      throw new Error('Invalid API response: No data received');
+    }
+
     // Filter out invalid rewards and transform the response
-    const filteredResults = response.data.results
+    const filteredResults = (response.data.results || [])
       .filter(isValidReward)
       .map(reward => ({
         ...reward,
@@ -49,8 +59,8 @@ export const fetchRewards = async (page: number = 1, limit: number = 10): Promis
         ].filter(pic => pic && typeof pic === 'string' && pic.trim() !== ''),
       }));
 
-    const totalCount = response.data.count;
-    const hasNextPage = Boolean(response.data.next);
+    const totalCount = response.data.count ?? 0;
+    const hasNextPage = Boolean(response.data?.next);
 
     console.log('hasNextPage', hasNextPage);
     console.log('totalCount', totalCount);
@@ -60,9 +70,9 @@ export const fetchRewards = async (page: number = 1, limit: number = 10): Promis
       ...response.data,
       results: filteredResults,
       count: totalCount,
-      // Use the API's pagination URLs directly
-      next: response.data.next,
-      previous: response.data.previous,
+      // Use the API's pagination URLs directly with safety checks
+      next: response.data?.next ?? null,
+      previous: response.data?.previous ?? null,
     };
   } catch (error) {
     throw error;

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { colors, typography } from '../styles/common';
+import { IS_IOS, PLATFORM } from '../constants/platform';
 
 interface CustomHeaderProps {
   title: string;
@@ -18,8 +19,8 @@ const CustomHeader = ({ title, showBack }: CustomHeaderProps) => {
   };
 
   const getHeaderStyle = () => ({
-    paddingTop: Platform.OS === 'ios' ? insets.top : 16,
-    height: Platform.OS === 'ios' ? 44 + insets.top : 56,
+    paddingTop: IS_IOS ? insets.top : 16,
+    height: IS_IOS ? PLATFORM.HEADER_HEIGHT + insets.top : PLATFORM.HEADER_HEIGHT,
   });
 
   return (
@@ -31,7 +32,7 @@ const CustomHeader = ({ title, showBack }: CustomHeaderProps) => {
             style={styles.backButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            {Platform.OS === 'ios' ? (
+            {IS_IOS ? (
               <Text style={styles.backText}>Back</Text>
             ) : (
               <Text style={styles.backIcon}>‹</Text>

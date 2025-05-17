@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
@@ -11,18 +11,6 @@ import { styles } from './styles';
 
 // Keep RewardCard memoized as it's a list item
 const MemoizedRewardCard = React.memo(RewardCard);
-
-// Keep ListHeader memoized as it receives stable props and is part of the list
-const ListHeader = React.memo(({ collectedCount, onPress }: { collectedCount: number; onPress: () => void }) => (
-  <TouchableOpacity
-    style={styles.collectedButton}
-    onPress={onPress}
-  >
-    <Text style={styles.collectedButtonText}>
-      View Collected Rewards ({collectedCount})
-    </Text>
-  </TouchableOpacity>
-));
 
 // Keep ListFooter memoized as it's reused in the list with same props frequently
 const ListFooter = React.memo(({ loading, hasMore, rewardsCount }: { loading: boolean; hasMore: boolean; rewardsCount: number }) => {
@@ -112,12 +100,6 @@ const AvailableRewardsScreen = () => {
         keyExtractor={keyExtractor}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListHeaderComponent={
-          <ListHeader
-            collectedCount={collectedRewards.length}
-            onPress={handleNavigateToCollected}
-          />
-        }
         ListFooterComponent={
           <ListFooter
             loading={loading}
@@ -146,6 +128,16 @@ const AvailableRewardsScreen = () => {
           rewards.length === 0 && styles.emptyList,
         ]}
       />
+      <SafeAreaView style={styles.fixedButtonContainer}>
+        <TouchableOpacity
+          style={styles.fixedCollectedButton}
+          onPress={handleNavigateToCollected}
+        >
+          <Text style={styles.collectedButtonText}>
+            View Collected Rewards ({collectedRewards.length})
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 };

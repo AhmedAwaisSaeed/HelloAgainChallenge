@@ -39,15 +39,15 @@ export const useRewards = () => {
       const response = await fetchRewards(page, 10);
 
       if (isRefreshing) {
-        setRewards(response.results);
+        setRewards(response?.results || []);
         currentPageRef.current = 2;
       } else {
-        setRewards(prevRewards => [...prevRewards, ...response.results]);
+        setRewards(prevRewards => [...prevRewards, ...(response?.results || [])]);
         currentPageRef.current += 1;
       }
 
-      // Update hasMore based on response.next
-      const hasNextPage = Boolean(response.next);
+      // Update hasMore based on response.next with safety check
+      const hasNextPage = Boolean(response?.next);
       hasMoreRef.current = hasNextPage;
       setHasMore(hasNextPage);
       console.log('Has next page:', hasNextPage, 'Current page:', currentPageRef.current);
