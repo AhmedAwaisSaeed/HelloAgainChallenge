@@ -45,8 +45,6 @@ const CollectedRewardsScreen = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
         initialNumToRender={8}
         windowSize={5}
       />
