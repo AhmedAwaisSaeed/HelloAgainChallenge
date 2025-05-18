@@ -1,9 +1,10 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, FlatList, Text, RefreshControl, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
 import CustomHeader from '../../../shared/components/CustomHeader';
+import Spinner from '../../../shared/components/Spinner';
 import { commonStyles, colors } from '../../../shared/styles/common';
 import { Reward } from '../../../core/types/reward';
 import { RootStackParamList } from '../../../navigation/types';
@@ -28,7 +29,7 @@ const ListFooter = React.memo(({ loading, hasMore, rewardsCount }: { loading: bo
   if (loading && rewardsCount > 0) {
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <Spinner size="small" />
       </View>
     );
   }
@@ -37,7 +38,13 @@ const ListFooter = React.memo(({ loading, hasMore, rewardsCount }: { loading: bo
 
 // Simple component, no need for memo
 const ListEmpty = ({ loading, error }: { loading: boolean; error: string | null }) => {
-  if (loading) {return null;}
+  if (loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Spinner size="large" />
+      </View>
+    );
+  }
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>
@@ -90,6 +97,16 @@ const AvailableRewardsScreen = () => {
 
   const keyExtractor = useCallback((item: Reward) => item.id, []);
 
+  // Show fullscreen spinner on initial load
+  if (loading && rewards.length === 0) {
+    return (
+      <View style={commonStyles.container}>
+        <CustomHeader title="Available Rewards" />
+        <Spinner fullscreen />
+      </View>
+    );
+  }
+
   return (
     <View style={commonStyles.container}>
       <CustomHeader title="Available Rewards" />
@@ -117,7 +134,7 @@ const AvailableRewardsScreen = () => {
         windowSize={5}
         refreshControl={
           <RefreshControl
-            refreshing={loading && rewards.length === 0}
+            refreshing={false}
             onRefresh={() => loadRewards(true)}
             enabled={true}
             colors={[colors.primary]}

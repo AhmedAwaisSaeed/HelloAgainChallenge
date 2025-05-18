@@ -6,7 +6,7 @@ import { collectReward } from '../../core/store/rewardsSlice';
 import { RootState } from '../../core/store/store';
 
 export const useRewards = () => {
-  const [loading, setLoading] = useState(false);
+  const [availableRewardsLoading, setAvailableRewardsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -31,7 +31,7 @@ export const useRewards = () => {
 
     try {
       loadingRef.current = true;
-      setLoading(true);
+      setAvailableRewardsLoading(true);
       setError(null);
 
       const page = isRefreshing ? 1 : currentPageRef.current;
@@ -58,7 +58,7 @@ export const useRewards = () => {
       hasMoreRef.current = false;
       setHasMore(false);
     } finally {
-      setLoading(false);
+      setAvailableRewardsLoading(false);
       loadingRef.current = false;
     }
   }, []); // No dependencies needed since we're using refs
@@ -73,7 +73,7 @@ export const useRewards = () => {
 
   return {
     rewards,
-    loading,
+    loading: availableRewardsLoading,
     error,
     hasMore,
     collectedRewards,
