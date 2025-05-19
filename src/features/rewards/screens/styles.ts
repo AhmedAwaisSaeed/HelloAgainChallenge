@@ -1,9 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '../../../shared/styles/common';
+import { BUTTON, SAFE_AREA, LIST, SHADOW } from '../../../shared/constants/layout';
+
+// Calculate the total bottom space needed
+const TOTAL_BOTTOM_PADDING = BUTTON.FIXED_HEIGHT + LIST.BOTTOM_MARGIN + SAFE_AREA.BOTTOM_PADDING;
 
 export const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: TOTAL_BOTTOM_PADDING,
   },
   emptyList: {
     flex: 1,
@@ -11,17 +15,29 @@ export const styles = StyleSheet.create({
   footer: {
     paddingVertical: 20,
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
   endText: {
     color: colors.textSecondary,
     ...typography.body,
   },
-  collectedButton: {
+  fixedButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    paddingBottom: SAFE_AREA.BOTTOM_PADDING,
+    ...SHADOW.MEDIUM,
+  },
+  fixedCollectedButton: {
     backgroundColor: colors.primary,
     padding: spacing.md,
     margin: spacing.md,
-    borderRadius: 8,
+    borderRadius: BUTTON.BORDER_RADIUS,
     alignItems: 'center',
+    height: BUTTON.FIXED_HEIGHT,
+    justifyContent: 'center',
   },
   collectedButtonText: {
     color: 'white',

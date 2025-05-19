@@ -1,9 +1,10 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, FlatList, Text, RefreshControl, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
 import CustomHeader from '../../../shared/components/CustomHeader';
+import Spinner from '../../../shared/components/Spinner';
 import { commonStyles, colors } from '../../../shared/styles/common';
 import { Reward } from '../../../core/types/reward';
 import { RootStackParamList } from '../../../navigation/types';
@@ -12,20 +13,8 @@ import { styles } from './styles';
 // Keep RewardCard memoized as it's a list item
 const MemoizedRewardCard = React.memo(RewardCard);
 
-// Keep ListHeader memoized as it receives stable props and is part of the list
-const ListHeader = React.memo(({ collectedCount, onPress }: { collectedCount: number; onPress: () => void }) => (
-  <TouchableOpacity
-    style={styles.collectedButton}
-    onPress={onPress}
-  >
-    <Text style={styles.collectedButtonText}>
-      View Collected Rewards ({collectedCount})
-    </Text>
-  </TouchableOpacity>
-));
-
 // Keep ListFooter memoized as it's reused in the list with same props frequently
-const ListFooter = React.memo(({ loading, hasMore }: { loading: boolean; hasMore: boolean }) => {
+const ListFooter = React.memo(({ loading, hasMore, rewardsCount }: { loading: boolean; hasMore: boolean; rewardsCount: number }) => {
   if (!loading) {
     if (!hasMore) {
       return (
@@ -36,16 +25,26 @@ const ListFooter = React.memo(({ loading, hasMore }: { loading: boolean; hasMore
     }
     return null;
   }
-  return (
-    <View style={styles.footer}>
-      <ActivityIndicator size="large" color={colors.primary} />
-    </View>
-  );
+  // Only show loading indicator if we're not in a pull-to-refresh state
+  if (loading && rewardsCount > 0) {
+    return (
+      <View style={styles.footer}>
+        <Spinner size="small" />
+      </View>
+    );
+  }
+  return null;
 });
 
 // Simple component, no need for memo
 const ListEmpty = ({ loading, error }: { loading: boolean; error: string | null }) => {
-  if (loading) {return null;}
+  if (loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Spinner size="large" />
+      </View>
+    );
+  }
   return (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>
@@ -98,6 +97,16 @@ const AvailableRewardsScreen = () => {
 
   const keyExtractor = useCallback((item: Reward) => item.id, []);
 
+  // Show fullscreen spinner on initial load
+  if (loading && rewards.length === 0) {
+    return (
+      <View style={commonStyles.container}>
+        <CustomHeader title="Available Rewards" />
+        <Spinner fullscreen />
+      </View>
+    );
+  }
+
   return (
     <View style={commonStyles.container}>
       <CustomHeader title="Available Rewards" />
@@ -108,28 +117,24 @@ const AvailableRewardsScreen = () => {
         keyExtractor={keyExtractor}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListHeaderComponent={
-          <ListHeader
-            collectedCount={collectedRewards.length}
-            onPress={handleNavigateToCollected}
-          />
-        }
         ListFooterComponent={
-          <ListFooter loading={loading} hasMore={hasMore} />
+          <ListFooter
+            loading={loading}
+            hasMore={hasMore}
+            rewardsCount={rewards.length}
+          />
         }
         ListEmptyComponent={
           <ListEmpty loading={loading} error={error} />
         }
         removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
         initialNumToRender={8}
         windowSize={5}
         refreshControl={
           <RefreshControl
-            refreshing={loading && rewards.length === 0}
+            refreshing={false}
             onRefresh={() => loadRewards(true)}
-            enabled={hasMore}
+            enabled={true}
             colors={[colors.primary]}
           />
         }
@@ -138,6 +143,16 @@ const AvailableRewardsScreen = () => {
           rewards.length === 0 && styles.emptyList,
         ]}
       />
+      <SafeAreaView style={styles.fixedButtonContainer}>
+        <TouchableOpacity
+          style={styles.fixedCollectedButton}
+          onPress={handleNavigateToCollected}
+        >
+          <Text style={styles.collectedButtonText}>
+            View Collected Rewards ({collectedRewards.length})
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 };

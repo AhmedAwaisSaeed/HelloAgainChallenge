@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Reward } from '../types/reward';
 
-interface RewardsState {
+type RewardsState ={
   collectedRewards: Reward[];
 }
 
