@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { RewardApiResponse, Reward } from '../types/reward';
-
-const BASE_URL = 'https://staging.helloagain.at/api/v1/clients/5189';
+import { getBaseUrl } from '../config/webservices';
 
 const hasValidImage = (reward: Reward): boolean => {
   const { image, pictures } = reward || {};
@@ -35,7 +34,7 @@ export const fetchRewards = async (page: number = 1, limit: number = 10): Promis
     const validPage = Math.max(1, Math.floor(page));
     const validLimit = Math.max(1, Math.floor(limit));
 
-    const response = await axios.get<RewardApiResponse>(`${BASE_URL}/bounties/`, {
+    const response = await axios.get<RewardApiResponse>(`${getBaseUrl()}/bounties/`, {
       params: {
         limit: validLimit,
         page: validPage,
