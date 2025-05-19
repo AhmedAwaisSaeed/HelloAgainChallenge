@@ -5,7 +5,6 @@
 export const REGEX = {
   // HTML tags
   HTML_TAGS: /<[^>]*>/g,
-
   // Common validation patterns
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   URL: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,

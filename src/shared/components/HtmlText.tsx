@@ -13,9 +13,12 @@ interface HtmlTextProps extends TextProps {
 const HtmlText: React.FC<HtmlTextProps> = ({ html, style, ...props }) => {
   if (!html) {return null;}
 
+  const cleanText = removeHtmlTags(html);
+  if (!cleanText.trim()) {return null;}
+
   return (
     <Text style={style} {...props}>
-      {removeHtmlTags(html)}
+      {cleanText}
     </Text>
   );
 };

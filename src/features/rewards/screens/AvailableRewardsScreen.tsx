@@ -1,10 +1,11 @@
 import React, { useEffect, useCallback, useRef } from 'react';
-import { View, FlatList, Text, RefreshControl, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, FlatList, Text, RefreshControl, SafeAreaView } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useRewards } from '../../../shared/hooks/useRewards';
 import RewardCard from '../../../shared/components/RewardCard';
 import CustomHeader from '../../../shared/components/CustomHeader';
 import Spinner from '../../../shared/components/Spinner';
+import Button from '../../../shared/components/Button';
 import { commonStyles, colors } from '../../../shared/styles/common';
 import { Reward } from '../../../core/types/reward';
 import { RootStackParamList } from '../../../navigation/types';
@@ -144,14 +145,14 @@ const AvailableRewardsScreen = () => {
         ]}
       />
       <SafeAreaView style={styles.fixedButtonContainer}>
-        <TouchableOpacity
-          style={styles.fixedCollectedButton}
-          onPress={handleNavigateToCollected}
-        >
-          <Text style={styles.collectedButtonText}>
-            View Collected Rewards ({collectedRewards.length})
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonWrapper}>
+          <Button
+            title={`View Collected Rewards (${collectedRewards.length})`}
+            onPress={handleNavigateToCollected}
+            variant="primary"
+            fullWidth
+          />
+        </View>
       </SafeAreaView>
     </View>
   );
