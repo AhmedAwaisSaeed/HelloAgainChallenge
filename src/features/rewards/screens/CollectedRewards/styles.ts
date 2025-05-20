@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors, typography } from '../../../shared/styles/common';
+import { colors, typography } from '../../../../shared/styles/common';
 
 export const styles = StyleSheet.create({
   centerContent: {

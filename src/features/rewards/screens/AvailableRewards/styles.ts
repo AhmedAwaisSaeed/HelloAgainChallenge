@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../../shared/styles/common';
-import { BUTTON, SAFE_AREA, LIST, SHADOW } from '../../../shared/constants/layout';
+import { colors, spacing, typography } from '../../../../shared/styles/common';
+import { BUTTON, SAFE_AREA, LIST, SHADOW } from '../../../../shared/constants/layout';
 
 // Calculate the total bottom space needed
 const TOTAL_BOTTOM_PADDING = BUTTON.FIXED_HEIGHT + LIST.BOTTOM_MARGIN + SAFE_AREA.BOTTOM_PADDING;
