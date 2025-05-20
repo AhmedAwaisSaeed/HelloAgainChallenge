@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { View, FlatList, Text } from 'react-native';
-import { useRewards } from '../../../shared/hooks/useRewards';
-import RewardCard from '../../../shared/components/RewardCard';
-import CustomHeader from '../../../shared/components/CustomHeader';
-import { commonStyles } from '../../../shared/styles/common';
-import { Reward } from '../../../core/types/reward';
+import { useRewards } from '../../../../shared/hooks/useRewards';
+import RewardCard from '../../../../shared/components/RewardCard';
+import CustomHeader from '../../../../shared/components/CustomHeader';
+import { commonStyles } from '../../../../shared/styles/common';
+import { Reward } from '../../../../core/types/reward';
 import { styles } from './styles';
 
 // Keep RewardCard memoized as it's a list item
